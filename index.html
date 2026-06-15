@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CAP AI — Banca de teste do motor</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #faf8f4; color: #2a2a28; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+    .aviso {
+      background: #fff8e1; border: 1px solid #f0c040; border-radius: 10px;
+      padding: 14px 18px; margin-bottom: 18px; font-size: 14px; color: #5a4200;
+      line-height: 1.6;
+    }
+    .aviso b { display: block; margin-bottom: 4px; font-size: 15px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const DEFAULT_PROMPT = `Você é o motor de análise do CAP AI, uma ferramenta de proteção infantil. Sua tarefa é analisar uma conversa de chat que pode envolver uma criança (6 a 13 anos) em jogos ou plataformas online (Roblox, Discord, etc.) e avaliar o risco de aliciamento (grooming) ou manipulação por um adulto mal-intencionado. O objetivo é PREVENIR o dano — alertar antes que a criança responda ou seja prejudicada.
+
+REGRA MAIS IMPORTANTE: analise a CONVERSA INTEIRA e a ESTRUTURA da interação, nunca palavras isoladas. Muitas palavras de risco aparecem em conversas totalmente inocentes entre crianças. Seu maior erro possível é o ALARME FALSO: marcar como perigo uma conversa normal de criança. Quando o contexto indicar papo comum entre colegas/amigos, dê risco baixo MESMO que apareçam palavras como robux, discord, desafio, segredo ou foto.
+
+O que caracteriza PERIGO (geralmente uma dinâmica de estranho/adulto + uma estrutura de manipulação):
+1. Migração de plataforma: tentar levar a criança do ambiente atual para um canal mais privado (discord, instagram, whatsapp), especialmente vindo de desconhecido, insistindo após recusa, ou minando a relação com os pais.
+2. Isca de moeda virtual: oferecer robux/skins/itens de forma CONDICIONAL e suspeita ("te dou X se você fizer Y"), sobretudo se Y for sair da plataforma, mandar foto ou guardar segredo.
+3. Recompensa por ato nocivo: condicionar um prêmio a a criança se machucar, fazer um "desafio" perigoso ao próprio corpo, ou mandar prova disso.
+4. Extração financeira: induzir a transferir dinheiro, fazer pix, usar o cartão ou o celular dos pais, especialmente escondido.
+
+Sinais de apoio que aumentam o risco quando aparecem juntos: pedir segredo, verificar se a criança está sozinha, induzir a apagar a conversa, coletar dados (idade, cidade, escola) vindo de estranho, usar choque emocional/medo, chantagem/ameaça.
+
+O que é INOCENTE (NÃO deve disparar): amigos conhecidos combinando de jogar em outra plataforma; falar de robux/skins sem oferta condicional suspeita; trocas normais dentro do jogo; desafios do próprio jogo; segredos triviais entre amigos; menção natural aos pais; combinação de servidor entre conhecidos; empolgação e gírias intensas; colegas falando de idade/escola.
+
+Pontuação (0 a 100):
+- 0–20 (nenhum): conversa normal de criança.
+- 21–50 (baixo): levemente fora do comum, sem dinâmica clara de aliciamento.
+- 51–75 (medio): sinais de manipulação presentes, contexto suspeito.
+- 76–100 (alto): estrutura clara de aliciamento. Gera alerta imediato.
+
+Responda APENAS com um objeto JSON válido, sem texto antes ou depois e sem marcação de código, exatamente neste formato:
+{"score": <0-100>, "nivel": "<nenhum|baixo|medio|alto>", "padroes": ["..."], "trecho_critico": "<frase que mais pesou ou ''>", "explicacao": "<1-2 frases em português>", "acao": "<nenhuma|registrar|alertar responsavel>"}`;
+
+const TESTES = [
+  { id:"P01", txt:"A: vc joga mt bem, qts anos vc tem?\nB: 9\nA: nss, vamo continuar no discord? me add la q é mais facil", rotulo:"perigo" },
+  { id:"P02", txt:"A: to dando 1000 robux de gf, mas so pra quem me add no disc\nA: chama la q te mando", rotulo:"perigo" },
+  { id:"P03", txt:"A: quer ganhar robux gratis? faz um desafio de coragem\nA: tem q se machucar e mandar foto pra provar, ai eu libero", rotulo:"perigo" },
+  { id:"P04", txt:"A: vc consegue pegar o cartao da sua mae?\nA: faz um pix pra mim q eu te dou item raro", rotulo:"perigo" },
+  { id:"P05", txt:"A: vc ta sozinho em casa? seus pais tao ai?\nB: nao, minha mae saiu\nA: q bom, fica nosso segredo q a gnt ta conversando ta?", rotulo:"perigo" },
+  { id:"P06", txt:"A: vc é especial, vou te dar um presente\nA: mas nao conta pra ninguem, nem pros seus pais, fica so entre nos", rotulo:"perigo" },
+  { id:"P07", txt:"A: cê parece gente boa, teu insta? add la\nB: minha mae nao deixa\nA: pq vc conta tudo pra ela? esquece, chama no zap entao", rotulo:"perigo" },
+  { id:"P08", txt:"A: depois apaga essa conversa ta? pra ninguem ver\nA: confia em mim", rotulo:"perigo" },
+  { id:"P09", txt:"A: oi! to fazendo amizade, vc é de qual cidade?\nB: criciuma\nA: aaa perto de mim! me add no disc q te dou robux", rotulo:"perigo" },
+  { id:"P10", txt:"A: preciso te falar uma coisa seria\nA: aconteceu uma tragedia, me responde so no privado, nao conta pra ninguem", rotulo:"perigo" },
+  { id:"P11", txt:"A: bora fazer um trato? te dou skin rara\nA: mas vc tem q fazer uma prova perigosa q eu mandar e filmar", rotulo:"perigo" },
+  { id:"P12", txt:"A: pega o celular da sua mae escondido\nA: vou te ensinar a comprar robux, ela nem vai ver", rotulo:"perigo" },
+  { id:"P13", txt:"A: vc ja me add no disc, agr vc TEM q me mandar uma foto\nA: senao eu conto pra todo mundo q vc falou comigo", rotulo:"perigo" },
+  { id:"I01", txt:"A: mano ganhei 100 robux no evento!\nB: q sorte kkk bora comprar aquela skin", rotulo:"inocente" },
+  { id:"I02", txt:"A: bora jogar valorant depois? add eu no disc, sou o joao da sua sala\nB: blz joao kk", rotulo:"inocente" },
+  { id:"I03", txt:"A: troca seu item por 50 robux?\nB: fechou", rotulo:"inocente" },
+  { id:"I04", txt:"A: nao posso jogar agr minha mae ta chamando pra jantar\nB: kk vai la, depois a gnt joga", rotulo:"inocente" },
+  { id:"I05", txt:"A: te desafio a zerar essa fase sem morrer kkk\nB: aceito! valendo o q?", rotulo:"inocente" },
+  { id:"I06", txt:"A: nao conta pro pedro q eu comprei o presente de aniversario dele ta\nB: kk pode deixar, surpresa", rotulo:"inocente" },
+  { id:"I07", txt:"A: vc ta em q ano na escola?\nB: 5 ano vc?\nA: 6 ano kk", rotulo:"inocente" },
+  { id:"I08", txt:"A: AAAA ganhei o jogo!!! to mt feliz\nB: parabens mano kkkkk", rotulo:"inocente" },
+  { id:"I09", txt:"A: me ajuda a passar essa fase? to travado\nB: bora, fica perto de mim", rotulo:"inocente" },
+  { id:"I10", txt:"A: vou pedir robux de aniversario pra minha mae\nB: boa ideia kk", rotulo:"inocente" },
+  { id:"I11", txt:"A: bora marcar de jogar amanha 3h?\nB: fechou, te vejo no servidor", rotulo:"inocente" },
+];
+
+const NIVEL = {
+  alto:   { cor:"#a32d2d", bg:"#fcebeb", rotulo:"Alto" },
+  medio:  { cor:"#854f0b", bg:"#faeeda", rotulo:"Médio" },
+  baixo:  { cor:"#3b6d11", bg:"#eaf3de", rotulo:"Baixo" },
+  nenhum: { cor:"#0f6e56", bg:"#e1f5ee", rotulo:"Nenhum" },
+};
+
+const API_KEY = "COLE_SUA_CHAVE_AQUI";
+
+async function analisar(conversa, prompt) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-allow-browser": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: prompt,
+      messages: [{ role:"user", content:"Analise esta conversa e responda só o JSON:\n\n" + conversa }],
+    }),
+  });
+  const data = await res.json();
+  const texto = (data.content||[]).map(b => b.type==="text" ? b.text : "").join("");
+  return JSON.parse(texto.replace(/```json|```/g,"").trim());
+}
+
+function classifica(rotulo, score) {
+  const p = score >= 51;
+  if (rotulo==="perigo") return p ? "ok" : "passou";
+  return p ? "falso" : "ok";
+}
+
+function Metric({ n, label, sub, cor }) {
+  return (
+    <div style={{flex:"1 1 140px",background:"#fff",border:"1px solid #e7e2d8",borderRadius:10,padding:"12px 14px"}}>
+      <div style={{fontFamily:"Georgia,serif",fontSize:28,fontWeight:700,color:cor,lineHeight:1}}>{n}</div>
+      <div style={{fontSize:13.5,color:"#1d1d1b",marginTop:4}}>{label}</div>
+      <div style={{fontSize:12,color:"#a8a499"}}>{sub}</div>
+    </div>
+  );
+}
+
+function App() {
+  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
+  const [mostraPrompt, setMostraPrompt] = useState(false);
+  const [conversa, setConversa] = useState(TESTES[0].txt);
+  const [esperado, setEsperado] = useState(TESTES[0].rotulo);
+  const [res, setRes] = useState(null);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [lote, setLote] = useState([]);
+  const [rodando, setRodando] = useState(false);
+  const [prog, setProg] = useState(0);
+
+  const fonte = "'Segoe UI',Tahoma,Geneva,sans-serif";
+  const caixa = {background:"#fff",border:"1px solid #e7e2d8",borderRadius:12,padding:20,marginBottom:18};
+  const tit = {fontFamily:"Georgia,serif",fontWeight:600,color:"#1d1d1b",margin:"0 0 4px"};
+  const btn = {background:"#0f6e56",color:"#fff",border:"none",borderRadius:8,padding:"11px 20px",fontSize:15,cursor:"pointer",fontFamily:fonte};
+  const btn2 = {...btn,background:"#1d1d1b"};
+
+  async function rodarUma() {
+    setErro(""); setRes(null); setCarregando(true);
+    try { setRes(await analisar(conversa, prompt)); }
+    catch(e) { setErro("Erro ao analisar. Verifique se a chave de API está configurada corretamente."); }
+    setCarregando(false);
+  }
+
+  async function rodarTudo() {
+    setRodando(true); setLote([]); setProg(0);
+    const out = [];
+    for (let i=0; i<TESTES.length; i++) {
+      const t = TESTES[i];
+      try {
+        const r = await analisar(t.txt, prompt);
+        out.push({...t,...r,status:classifica(t.rotulo,r.score)});
+      } catch(e) {
+        out.push({...t,score:-1,nivel:"—",explicacao:"erro",status:"erro"});
+      }
+      setLote([...out]); setProg(i+1);
+    }
+    setRodando(false);
+  }
+
+  const falsos  = lote.filter(l=>l.status==="falso").length;
+  const passou  = lote.filter(l=>l.status==="passou").length;
+  const acertos = lote.filter(l=>l.status==="ok").length;
+
+  return (
+    <div style={{fontFamily:fonte,background:"#faf8f4",color:"#2a2a28",padding:"22px 16px",minHeight:"100vh",lineHeight:1.55}}>
+      <div style={{maxWidth:760,margin:"0 auto"}}>
+
+        <div style={{marginBottom:20}}>
+          <h1 style={{fontFamily:"Georgia,serif",fontWeight:600,fontSize:26,color:"#1d1d1b",margin:"0 0 4px"}}>CAP AI — Banca de teste do motor</h1>
+          <p style={{margin:0,color:"#6d6a62",fontSize:15}}>Protótipo de validação. Analisa conversas simuladas para medir a precisão do motor de detecção de aliciamento infantil em português.</p>
+        </div>
+
+        <div style={{...caixa,background:"#fff8e1",border:"1px solid #f0c040"}}>
+          <b style={{display:"block",marginBottom:4,color:"#5a4200",fontSize:15}}>⚠️ Aviso — protótipo de pesquisa</b>
+          <p style={{color:"#5a4200",fontSize:13.5,margin:0}}>Esta ferramenta usa conversas <b>sintéticas e inventadas</b> para testar o motor de IA. Não monitora nenhuma criança real. É um instrumento de validação técnica do CAP AI.</p>
+        </div>
+
+        <div style={caixa}>
+          <div onClick={()=>setMostraPrompt(!mostraPrompt)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <h2 style={{...tit,fontSize:17}}>Instrução do motor (o cérebro)</h2>
+            <span style={{color:"#0f6e56",fontSize:14}}>{mostraPrompt ? "ocultar ▲" : "ver e editar ▼"}</span>
+          </div>
+          <p style={{margin:"4px 0 0",color:"#6d6a62",fontSize:13.5}}>É isto que o motor "sabe". Editar este texto muda como ele analisa.</p>
+          {mostraPrompt && (
+            <textarea value={prompt} onChange={e=>setPrompt(e.target.value)} spellCheck={false}
+              style={{width:"100%",height:320,marginTop:12,padding:12,fontFamily:"monospace",fontSize:12.5,lineHeight:1.5,border:"1px solid #e7e2d8",borderRadius:8,boxSizing:"border-box",resize:"vertical"}}/>
+          )}
+        </div>
+
+        <div style={caixa}>
+          <h2 style={{...tit,fontSize:17}}>Testar uma conversa</h2>
+          <select onChange={e=>{const t=TESTES.find(x=>x.id===e.target.value);if(t){setConversa(t.txt);setEsperado(t.rotulo);setRes(null);}}}
+            style={{width:"100%",padding:"9px 10px",marginTop:10,marginBottom:10,border:"1px solid #e7e2d8",borderRadius:8,fontSize:14,fontFamily:fonte,background:"#fff"}}>
+            {TESTES.map(t=><option key={t.id} value={t.id}>{t.id} ({t.rotulo}) — {t.txt.split("\n")[0].slice(0,48)}…</option>)}
+          </select>
+          <textarea value={conversa} onChange={e=>{setConversa(e.target.value);setEsperado("");}}
+            style={{width:"100%",height:96,padding:12,border:"1px solid #e7e2d8",borderRadius:8,fontSize:14,fontFamily:fonte,boxSizing:"border-box",background:"#fbfaf7",resize:"vertical"}}/>
+          <div style={{display:"flex",gap:10,alignItems:"center",marginTop:12,flexWrap:"wrap"}}>
+            <button style={btn} onClick={rodarUma} disabled={carregando}>{carregando ? "Analisando…" : "Analisar"}</button>
+            {esperado && <span style={{fontSize:13.5,color:"#6d6a62"}}>esperado: <b style={{color:esperado==="perigo"?"#a32d2d":"#0f6e56"}}>{esperado}</b></span>}
+          </div>
+          {erro && <p style={{color:"#a32d2d",fontSize:14,marginTop:12}}>{erro}</p>}
+          {res && (()=>{
+            const nv = NIVEL[res.nivel]||NIVEL.nenhum;
+            return (
+              <div style={{marginTop:16,border:`1px solid ${nv.cor}33`,borderRadius:10,overflow:"hidden"}}>
+                <div style={{background:nv.bg,padding:"14px 16px",display:"flex",alignItems:"center",gap:16}}>
+                  <div style={{fontFamily:"Georgia,serif",fontSize:34,fontWeight:700,color:nv.cor,lineHeight:1}}>{res.score}</div>
+                  <div>
+                    <div style={{fontWeight:600,color:nv.cor}}>Risco {nv.rotulo}</div>
+                    <div style={{fontSize:13,color:nv.cor}}>ação: {res.acao}</div>
+                  </div>
+                </div>
+                <div style={{padding:"14px 16px",background:"#fff"}}>
+                  {res.padroes&&res.padroes.length>0&&(
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:10}}>
+                      {res.padroes.map((p,i)=><span key={i} style={{background:"#f1efe8",color:"#444",fontSize:12.5,padding:"3px 9px",borderRadius:20}}>{p}</span>)}
+                    </div>
+                  )}
+                  <p style={{margin:"0 0 8px",fontSize:14.5}}>{res.explicacao}</p>
+                  {res.trecho_critico&&<p style={{margin:0,fontSize:13.5,color:"#6d6a62",fontStyle:"italic"}}>trecho crítico: "{res.trecho_critico}"</p>}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        <div style={caixa}>
+          <h2 style={{...tit,fontSize:17}}>Rodar as 24 e medir o alarme falso</h2>
+          <p style={{margin:"4px 0 12px",color:"#6d6a62",fontSize:13.5}}>Roda todas as conversas e compara com a resposta certa. O número que importa: alarmes falsos.</p>
+          <button style={btn2} onClick={rodarTudo} disabled={rodando}>{rodando ? `Rodando… ${prog}/24` : "Rodar as 24"}</button>
+          {lote.length>0&&(
+            <div style={{marginTop:16}}>
+              <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+                <Metric n={falsos}  label="alarmes falsos"       sub="de 11 inocentes" cor="#a32d2d"/>
+                <Metric n={passou}  label="perigos que passaram" sub="de 13 de perigo" cor="#854f0b"/>
+                <Metric n={acertos} label="acertos"              sub="de 24 no total"  cor="#0f6e56"/>
+              </div>
+              <div style={{border:"1px solid #e7e2d8",borderRadius:8,overflow:"hidden"}}>
+                {lote.map((l,i)=>{
+                  const c   = l.status==="ok"?"#0f6e56":l.status==="falso"?"#a32d2d":l.status==="passou"?"#854f0b":"#6d6a62";
+                  const tag = l.status==="ok"?"acertou":l.status==="falso"?"ALARME FALSO":l.status==="passou"?"PASSOU":"erro";
+                  return (
+                    <div key={l.id} style={{display:"flex",gap:10,padding:"9px 12px",fontSize:13.5,borderTop:i?"1px solid #f0ece3":"none",alignItems:"baseline"}}>
+                      <b style={{width:34,color:"#1d1d1b"}}>{l.id}</b>
+                      <span style={{width:70,color:l.rotulo==="perigo"?"#a32d2d":"#0f6e56"}}>{l.rotulo}</span>
+                      <span style={{width:44,textAlign:"right",color:"#1d1d1b"}}>{l.score<0?"—":l.score}</span>
+                      <span style={{flex:1,color:"#6d6a62",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.explicacao}</span>
+                      <b style={{color:c,fontSize:12,whiteSpace:"nowrap"}}>{tag}</b>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <p style={{textAlign:"center",color:"#a8a499",fontSize:12,margin:"8px 0 24px"}}>CAP AI · Protótipo de validação técnica · Conversas sintéticas · Nenhuma criança real monitorada</p>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
