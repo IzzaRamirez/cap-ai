@@ -10,12 +10,6 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #faf8f4; color: #2a2a28; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
-    .aviso {
-      background: #fff8e1; border: 1px solid #f0c040; border-radius: 10px;
-      padding: 14px 18px; margin-bottom: 18px; font-size: 14px; color: #5a4200;
-      line-height: 1.6;
-    }
-    .aviso b { display: block; margin-bottom: 4px; font-size: 15px; }
   </style>
 </head>
 <body>
@@ -80,27 +74,69 @@ const NIVEL = {
   nenhum: { cor:"#0f6e56", bg:"#e1f5ee", rotulo:"Nenhum" },
 };
 
-const API_KEY = "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";
+const MODELO = "claude-sonnet-5";
+const CHAVE_STORAGE = "capai_chave_api";
 
-async function analisar(conversa, prompt) {
+// Saída estruturada: a API garante que a resposta é um JSON válido neste formato,
+// mesmo que o texto do prompt seja editado na interface.
+const FORMATO_RESPOSTA = {
+  type: "json_schema",
+  schema: {
+    type: "object",
+    properties: {
+      score: { type: "integer", description: "Risco de 0 a 100" },
+      nivel: { type: "string", enum: ["nenhum", "baixo", "medio", "alto"] },
+      padroes: { type: "array", items: { type: "string" } },
+      trecho_critico: { type: "string" },
+      explicacao: { type: "string" },
+      acao: { type: "string", enum: ["nenhuma", "registrar", "alertar responsavel"] },
+    },
+    required: ["score", "nivel", "padroes", "trecho_critico", "explicacao", "acao"],
+    additionalProperties: false,
+  },
+};
+
+async function analisar(conversa, prompt, tentativa) {
+  tentativa = tentativa || 0;
+  const chave = localStorage.getItem(CHAVE_STORAGE) || "";
+  if (!chave) { const e = new Error("Cole sua chave de API no campo “Chave de API” acima."); e.semChave = true; throw e; }
+
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": API_KEY,
+      "x-api-key": chave,
       "anthropic-version": "2023-06-01",
+      // Necessário para chamar a API direto do navegador. Em produção a chamada
+      // deve passar por um backend próprio — nunca exponha a chave ao cliente.
       "anthropic-dangerous-allow-browser": "true"
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
+      model: MODELO,
+      max_tokens: 3000,
       system: prompt,
+      output_config: { format: FORMATO_RESPOSTA },
       messages: [{ role:"user", content:"Analise esta conversa e responda só o JSON:\n\n" + conversa }],
     }),
   });
+
+  // Sobrecarga ou limite de requisições: espera e tenta de novo (até 2 vezes)
+  if ((res.status === 429 || res.status >= 500) && tentativa < 2) {
+    await new Promise(r => setTimeout(r, 2000 * (tentativa + 1)));
+    return analisar(conversa, prompt, tentativa + 1);
+  }
+
+  if (!res.ok) {
+    const corpo = await res.json().catch(() => null);
+    const detalhe = corpo && corpo.error && corpo.error.message ? corpo.error.message : ("HTTP " + res.status);
+    const e = new Error(res.status === 401 ? "Chave de API inválida ou revogada." : detalhe);
+    e.status = res.status;
+    throw e;
+  }
+
   const data = await res.json();
-  const texto = (data.content||[]).map(b => b.type==="text" ? b.text : "").join("");
-  return JSON.parse(texto.replace(/```json|```/g,"").trim());
+  const texto = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+  return JSON.parse(texto);
 }
 
 function classifica(rotulo, score) {
@@ -122,6 +158,7 @@ function Metric({ n, label, sub, cor }) {
 function App() {
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [mostraPrompt, setMostraPrompt] = useState(false);
+  const [chave, setChave] = useState(localStorage.getItem(CHAVE_STORAGE) || "");
   const [conversa, setConversa] = useState(TESTES[0].txt);
   const [esperado, setEsperado] = useState(TESTES[0].rotulo);
   const [res, setRes] = useState(null);
@@ -130,6 +167,7 @@ function App() {
   const [lote, setLote] = useState([]);
   const [rodando, setRodando] = useState(false);
   const [prog, setProg] = useState(0);
+  const [erroLote, setErroLote] = useState("");
 
   const fonte = "'Segoe UI',Tahoma,Geneva,sans-serif";
   const caixa = {background:"#fff",border:"1px solid #e7e2d8",borderRadius:12,padding:20,marginBottom:18};
@@ -137,15 +175,20 @@ function App() {
   const btn = {background:"#0f6e56",color:"#fff",border:"none",borderRadius:8,padding:"11px 20px",fontSize:15,cursor:"pointer",fontFamily:fonte};
   const btn2 = {...btn,background:"#1d1d1b"};
 
+  function salvarChave(valor) {
+    setChave(valor);
+    localStorage.setItem(CHAVE_STORAGE, valor.trim());
+  }
+
   async function rodarUma() {
     setErro(""); setRes(null); setCarregando(true);
     try { setRes(await analisar(conversa, prompt)); }
-    catch(e) { setErro("Erro ao analisar. Verifique se a chave de API está configurada corretamente."); }
+    catch(e) { setErro(e.message || "Erro ao analisar."); }
     setCarregando(false);
   }
 
   async function rodarTudo() {
-    setRodando(true); setLote([]); setProg(0);
+    setErroLote(""); setRodando(true); setLote([]); setProg(0);
     const out = [];
     for (let i=0; i<TESTES.length; i++) {
       const t = TESTES[i];
@@ -153,11 +196,27 @@ function App() {
         const r = await analisar(t.txt, prompt);
         out.push({...t,...r,status:classifica(t.rotulo,r.score)});
       } catch(e) {
-        out.push({...t,score:-1,nivel:"—",explicacao:"erro",status:"erro"});
+        // Sem chave ou chave inválida: não adianta insistir nas outras 23
+        if (e.semChave || e.status === 401) { setErroLote(e.message); break; }
+        out.push({...t,score:-1,nivel:"—",explicacao:e.message || "erro",status:"erro"});
       }
       setLote([...out]); setProg(i+1);
     }
     setRodando(false);
+  }
+
+  function baixarCSV() {
+    const cab = ["id","rotulo_esperado","score","nivel","status","padroes","explicacao"];
+    const q = v => '"' + String(v == null ? "" : v).replace(/"/g,'""') + '"';
+    const linhas = [cab.join(",")].concat(lote.map(l =>
+      [l.id, l.rotulo, l.score, l.nivel, l.status, (l.padroes||[]).join("; "), l.explicacao].map(q).join(",")
+    ));
+    const blob = new Blob(["﻿" + linhas.join("\n")], {type:"text/csv;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "capai_resultados.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
 
   const falsos  = lote.filter(l=>l.status==="falso").length;
@@ -176,6 +235,16 @@ function App() {
         <div style={{...caixa,background:"#fff8e1",border:"1px solid #f0c040"}}>
           <b style={{display:"block",marginBottom:4,color:"#5a4200",fontSize:15}}>⚠️ Aviso — protótipo de pesquisa</b>
           <p style={{color:"#5a4200",fontSize:13.5,margin:0}}>Esta ferramenta usa conversas <b>sintéticas e inventadas</b> para testar o motor de IA. Não monitora nenhuma criança real. É um instrumento de validação técnica do CAP AI.</p>
+        </div>
+
+        <div style={caixa}>
+          <h2 style={{...tit,fontSize:17}}>Chave de API</h2>
+          <p style={{margin:"4px 0 10px",color:"#6d6a62",fontSize:13.5}}>
+            Cole sua chave da Anthropic (crie em <b>console.anthropic.com</b>). Ela fica salva <b>somente neste navegador</b> e é enviada apenas para a API da Anthropic. Nunca coloque a chave no código nem publique no GitHub.
+          </p>
+          <input type="password" value={chave} onChange={e=>salvarChave(e.target.value)} placeholder="sk-ant-..."
+            style={{width:"100%",padding:"10px 12px",border:"1px solid #e7e2d8",borderRadius:8,fontSize:14,fontFamily:"monospace",background:"#fbfaf7"}}/>
+          {!chave && <p style={{color:"#a32d2d",fontSize:13,margin:"8px 0 0"}}>Sem a chave, os botões de análise não funcionam.</p>}
         </div>
 
         <div style={caixa}>
@@ -231,7 +300,11 @@ function App() {
         <div style={caixa}>
           <h2 style={{...tit,fontSize:17}}>Rodar as 24 e medir o alarme falso</h2>
           <p style={{margin:"4px 0 12px",color:"#6d6a62",fontSize:13.5}}>Roda todas as conversas e compara com a resposta certa. O número que importa: alarmes falsos.</p>
-          <button style={btn2} onClick={rodarTudo} disabled={rodando}>{rodando ? `Rodando… ${prog}/24` : "Rodar as 24"}</button>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            <button style={btn2} onClick={rodarTudo} disabled={rodando}>{rodando ? `Rodando… ${prog}/24` : "Rodar as 24"}</button>
+            {lote.length>0 && !rodando && <button style={{...btn,background:"#6d6a62"}} onClick={baixarCSV}>Baixar CSV</button>}
+          </div>
+          {erroLote && <p style={{color:"#a32d2d",fontSize:14,marginTop:12}}>{erroLote}</p>}
           {lote.length>0&&(
             <div style={{marginTop:16}}>
               <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap"}}>
