@@ -109,7 +109,7 @@ async function analisar(conversa, prompt, tentativa) {
       "anthropic-version": "2023-06-01",
       // Necessário para chamar a API direto do navegador. Em produção a chamada
       // deve passar por um backend próprio — nunca exponha a chave ao cliente.
-      "anthropic-dangerous-allow-browser": "true"
+      "anthropic-dangerous-direct-browser-access": "true"
     },
     body: JSON.stringify({
       model: MODELO,
