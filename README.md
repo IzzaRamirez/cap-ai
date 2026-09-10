@@ -1,14 +1,12 @@
 # CAP AI — Motor de detecção de aliciamento infantil (grooming)
 
-O **CAP AI** é uma inteligência artificial preventiva que analisa conversas digitais de crianças de 6 a 13 anos (Roblox, YouTube, Discord e similares) e detecta **estruturas de aliciamento (grooming)** antes que o dano aconteça. A solução opera em três camadas:
+O **CAP AI** é uma inteligência artificial preventiva que analisa conversas digitais de crianças e adolescentes (YouTube, Discord e similares) e detecta **estruturas de aliciamento (grooming)** antes que o dano aconteça. A solução opera em três camadas:
 
-1. **Captura** — a mensagem é interceptada antes de ser exibida à criança;
+1. **Captura** — a mensagem é lida na interface após ser exibida, sem retenção nem atraso na entrega;
 2. **Análise** — a IA "Sentinela" avalia a conversa inteira em contexto e gera um score de risco (0–100);
-3. **Ação preventiva** — bloqueio da mensagem, alerta imediato aos responsáveis e aviso educativo à criança.
+3. **Ação preventiva** — alerta ao responsável com o trecho crítico e a explicação, e aviso educativo à criança.
 
-> ⚠️ **Estado atual:** este repositório contém a **banca de teste do motor de análise** (camada 2) — um protótipo de validação técnica. Nenhuma criança real é monitorada; todas as conversas são **sintéticas e inventadas**.
-
----
+> ⚠️ **Estado atual:** este repositório contém a banca de teste do motor de análise (camada 2) — um protótipo de validação técnica. Nenhuma criança real é monitorada; todas as conversas são **sintéticas e inventadas**.
 
 ## O que há neste repositório
 
@@ -29,9 +27,9 @@ O "cérebro" do motor é um prompt em português, editável na própria interfac
 2. Crie uma chave de API em [console.anthropic.com](https://console.anthropic.com) e cole no campo **Chave de API**. A chave fica salva apenas no seu navegador (localStorage).
 3. Teste uma conversa individual ou clique em **"Rodar as 24"** para medir a precisão do lote completo. O resultado pode ser exportado em CSV.
 
-### 🔒 Segurança da chave de API
+## 🔒 Segurança da chave de API
 
-**Nunca coloque a chave de API no código nem faça commit dela no GitHub.** Uma chave publicada em repositório público é considerada comprometida (mesmo que removida depois, permanece no histórico do git) e deve ser **revogada imediatamente** no console da Anthropic. Este protótipo chama a API direto do navegador apenas por ser um instrumento de pesquisa; em produção, toda chamada deve passar por um backend próprio que guarda a chave em variável de ambiente.
+Nunca coloque a chave de API no código nem faça commit dela no GitHub. Uma chave publicada em repositório público é considerada comprometida (mesmo que removida depois, permanece no histórico do git) e deve ser **revogada imediatamente** no console da Anthropic. Este protótipo chama a API direto do navegador apenas por ser um instrumento de pesquisa; em produção, toda chamada deve passar por um backend próprio que guarda a chave em variável de ambiente.
 
 ## Métricas
 
@@ -44,35 +42,16 @@ O limiar atual de disparo é `score >= 51` (níveis *médio* e *alto*).
 
 ## Estratégia de produto: o motor é o produto, não o app
 
-Um aplicativo de celular **não consegue** interceptar mensagens dentro do Roblox, YouTube ou Discord: iOS e Android isolam os aplicativos entre si, e os termos de uso dessas plataformas proíbem interceptação. Por isso a direção do projeto é tratar a **IA Sentinela como o ativo central** — um motor de detecção de grooming em português — entregável por canais que funcionam de verdade:
+Um aplicativo de celular **não consegue** interceptar mensagens dentro do Roblox, YouTube ou Discord: iOS e Android isolam os aplicativos entre si, e os termos de uso dessas plataformas proíbem interceptação. Por isso a direção do projeto é tratar a **IA Sentinela como o ativo central** — um motor de detecção de grooming em português — entregue nos 12 meses por **extensão de navegador (B2C)** e **bot de moderação Discord (B2B)**, canais que funcionam de verdade e operam sem interferir na entrega das mensagens:
 
 | Canal de entrega | Como funciona | Viabilidade |
 |---|---|---|
-| **API / SDK para plataformas (B2B)** | A própria plataforma (jogo, chat) chama o motor antes de exibir a mensagem — o único lugar onde a "camada 1" é tecnicamente possível | Alta (modelo de negócio principal) |
-| **Bot de moderação (Discord)** | Bot oficial instalado em servidores, com permissões legítimas de moderação | Alta (protótipo real de curto prazo) |
-| **Integração com contas (modelo Bark/Qustodio)** | Pais conectam as contas da criança; o serviço analisa as mensagens via API das plataformas | Média (depende das APIs disponíveis) |
-| **Extensão de navegador** | Analisa o chat nas versões web (Discord web, YouTube) | Média (bom para demonstração) |
-| **App móvel espelhando a tela** | Interceptação no dispositivo | **Inviável** (sandbox do SO + termos de uso) |
+| Extensão de navegador | Analisa o chat nas versões web (Discord web, YouTube) | **Alta — canal B2C, modelo de receita principal** |
+| Bot de moderação (Discord) | Bot oficial instalado em servidores, com permissões legítimas de moderação, via API pública | **Alta — canal B2B** |
+| API / SDK para plataformas | A própria plataforma chama o motor antes de exibir a mensagem | Alta como expansão futura, dependente de parceria |
+| Integração com contas (modelo Bark/Qustodio) | Pais conectam as contas da criança; o serviço analisa as mensagens via API das plataformas | Média (depende das APIs disponíveis) |
+| App móvel espelhando a tela | Interceptação no dispositivo | **Inviável** (sandbox do SO + termos de uso) |
 
 ## Ética e conformidade legal (Brasil)
 
-Qualquer evolução do protótipo precisa considerar desde o início:
-
-- **LGPD, art. 14** — tratamento de dados de crianças exige o melhor interesse da criança e consentimento específico de ao menos um dos pais ou responsável;
-- **ECA (Lei 8.069/1990)** e **Lei 13.431/2017** — proteção integral e escuta protegida de crianças vítimas ou testemunhas de violência;
-- **Equilíbrio proteção × privacidade** — monitoramento total é vigilância; o desenho deve prever autonomia progressiva conforme a idade (6 anos ≠ 13 anos);
-- **Pós-alerta** — o alerta aos pais deve vir acompanhado de orientação de acolhimento (como conversar com a criança sem culpabilizá-la), preservação de evidências e encaminhamento aos canais oficiais: **SaferNet** (denuncie.org.br), **Disque 100** e delegacias especializadas.
-
-## Roadmap sugerido
-
-- [x] Motor de análise v0 (prompt + score de risco) e banca de teste com 24 casos
-- [ ] Ampliar o conjunto de testes (100+ casos, incluindo casos ambíguos e gírias regionais)
-- [ ] Backend mínimo (proteger a chave de API; registrar métricas por versão do prompt)
-- [ ] Protótipo de captura real: bot de moderação para Discord
-- [ ] Fluxo pós-alerta: orientação aos pais + encaminhamento a canais de denúncia
-- [ ] Loop de feedback: responsável confirma/nega o alerta e o dado melhora o motor
-- [ ] Parcerias-piloto (escolas, plataformas) e validação com especialistas em proteção infantil
-
-## Licença e responsabilidade
-
-Protótipo de pesquisa. Não substitui supervisão parental nem os canais oficiais de denúncia. Em caso de suspeita real de aliciamento, procure imediatamente o **Disque 100** ou a **SaferNet Brasil**.
+O desenvolvimento é alinhado à **LGPD** (Lei 13.709/2018, art. 14 — tratamento de dados de crianças e adolescentes), ao **ECA** (Lei 8.069/1990) e à **ECA Digital** (Lei 15.211/2025). O design prevê minimização de dados, consentimento do responsável, transparência com a criança sobre a existência da ferramenta e calibragem dos alertas por faixa etária.
