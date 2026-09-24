@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "CAP AI",
+  "version": "0.1.0",
+  "description": "Estrutura inicial da CAP AI com popup informativo.",
+  "action": {
+    "default_title": "CAP AI — Informações",
+    "default_popup": "popup.html"
+  }
+}
