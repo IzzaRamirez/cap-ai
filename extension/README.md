@@ -1,29 +1,20 @@
-# CAP AI — extensão Chrome
+# CAP AI — extensão 0.2.0
 
-Esqueleto Manifest V3, versão 0.1.0. O único recurso é um popup informativo em português.
+Popup informativo e chat fictício com três resultados predefinidos. Esta demonstração não usa IA nem detecta grooming.
 
-## Instalar localmente
+## Atualizar e testar
 
-1. Abra `chrome://extensions` no Chrome.
-2. Ative o **Modo do desenvolvedor**.
-3. Clique em **Carregar sem compactação** e selecione esta pasta `extension/`.
-4. Abra a CAP AI pelo menu de extensões para ver o popup.
+1. Em edge://extensions, clique em Recarregar no cartão CAP AI. No Chrome, use chrome://extensions. Confira a versão 0.2.0.
+2. Abra o popup e clique em Abrir chat de demonstração.
+3. Selecione o exemplo de amigos e mostre o resultado: não há ação de ocultação.
+4. Selecione o exemplo de desconhecido. Mostre o resultado e o alerta predefinido; o botão de ocultar deve substituir somente a última mensagem. Clique novamente para restaurá-la.
+5. Selecione o convite sem contexto: o resultado deve indicar contexto insuficiente, sem ocultação.
+6. Reiniciar, mudar de exemplo ou recarregar a página deve limpar o resultado e restaurar as mensagens.
 
-## Arquivos
+Para primeira instalação, ative o modo do desenvolvedor e selecione esta pasta usando Carregar sem pacote (Edge) ou Carregar sem compactação (Chrome).
 
-- `manifest.json`: identificação da extensão e configuração do popup.
-- `popup.html`: conteúdo informativo e acessível.
-- `popup.css`: estilos locais, sem fontes ou recursos externos.
-- `assets/logo.png`: logo fornecida, exibida no topo do popup; arquivo original preservado.
+## Escopo
 
-## Escopo e privacidade
+Os novos arquivos demo.html, demo.css e demo.js implementam a simulação local. O script não lê outros sites, não envia mensagens nem acessa APIs. Não há permissões, content scripts, service worker ou armazenamento. A ocultação só afeta a página de demonstração e não bloqueia contatos reais.
 
-Não há JavaScript, service worker, content scripts, permissões, permissões de host, armazenamento, analytics ou chamadas de rede. A extensão não lê páginas, não acessa conversas e não envia dados. Não há monitoramento nesta versão.
-
-## Verificação manual
-
-Após carregar a pasta, confirme que o Chrome não indica erros e que o popup mostra as informações de privacidade. Feche e reabra o popup para verificar sua exibição. Para remover a extensão de teste, use **Remover** em `chrome://extensions`.
-
-## Aplicação ao repositório
-
-Copie esta pasta para `extension/` na raiz de `IzzaRamirez/cap-ai`. Todos os arquivos são novos; nenhum arquivo existente deve ser substituído. Revise as alterações antes de criar um commit ou enviá-las ao GitHub.
+A logo original é preservada em assets/logo.png. A banca de análise na raiz continua separada. A instalação e a reabertura da versão 0.1.0 foram testadas manualmente no Edge. Na versão 0.2.0, foram verificados visualmente os três exemplos, a ocultação, a restauração e o reinício. Veja o [registro dos testes](../docs/TESTE-MANUAL-EDGE.md). O Chrome continua pendente.

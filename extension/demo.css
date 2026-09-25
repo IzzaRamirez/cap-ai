@@ -1,0 +1,25 @@
+:root { font-family: system-ui, sans-serif; color: #202332; background: #f5f3fa; }
+* { box-sizing: border-box; }
+body { margin: 0; line-height: 1.6; }
+main { max-width: 1000px; margin: auto; padding: 36px 22px; }
+h1 { font-size: clamp(25px, 4vw, 36px); line-height: 1.2; margin: 8px 0 16px; }
+h2 { font-size: 19px; margin-top: 0; }
+.eyebrow { color: #45129d; font-weight: 700; }
+.notice { padding: 18px; background: #fff4d9; border: 1px solid #d8b975; border-radius: 12px; }
+.controls { margin: 26px 0; }
+label { display: block; font-weight: 700; margin-bottom: 8px; }
+select { width: 100%; padding: 12px; font: inherit; border-radius: 8px; border: 1px solid #81768e; background: white; }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+section { background: white; border: 1px solid #ddd5e8; padding: 24px; border-radius: 16px; }
+ol { list-style: none; padding: 0; margin: 0; }
+li { background: #f2eef9; padding: 12px; border-radius: 10px; margin: 12px 0; overflow-wrap: anywhere; }
+li strong { display: block; font-size: 13px; color: #504367; }
+button { background: #43109b; color: white; padding: 12px 16px; border: 0; border-radius: 8px; font: inherit; cursor: pointer; }
+button:disabled { opacity: .65; cursor: default; }
+button:focus-visible, select:focus-visible { outline: 3px solid #146cba; outline-offset: 4px; }
+.secondary { background: white; color: #43109b; border: 1px solid #43109b; margin-top: 22px; }
+.small { font-size: 13px; color: #565163; }
+#result:not(:empty) { margin: 18px 0; padding: 16px; border-left: 4px solid #7756a8; background: #f5f1fb; }
+#result strong { display: block; }
+[hidden] { display: none !important; }
+@media (max-width: 680px) { .columns { grid-template-columns: 1fr; } }

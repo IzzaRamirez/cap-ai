@@ -1,5 +1,17 @@
 # Diário de desenvolvimento — CAP AI
 
+> Atualizado até os testes guiados de 24/09/2026: versões 0.1.0 e 0.2.0 verificadas manualmente no Edge pela responsável, com capturas fornecidas na conversa. Veja [o registro completo dos testes](TESTE-MANUAL-EDGE.md) e a seção 12. Chrome e integração com IA continuam pendentes. As seções 1 a 11 preservam o histórico anterior aos testes.
+
+## Nova etapa — demonstração 0.2.0
+
+Após o pedido de avançar para um chat de teste, foram adicionados demo.html, demo.css e demo.js, com três roteiros fictícios, resultados predefinidos, aviso e ocultação reversível de uma mensagem. Foram atualizados manifesto, popup e README da extensão. O objetivo é testar a interface antes da integração com IA. A demonstração não classifica texto livre nem bloqueia contatos reais.
+
+Agora existe JavaScript exclusivo da página de demonstração; as descrições de ausência de JavaScript abaixo se referem à versão 0.1.0. Não foram adicionados permissões, content scripts, service worker, armazenamento ou chamadas de rede. A banca original segue separada.
+
+Sintaxe de demo.js verificada com node --check. Em seguida, a responsável testou os três exemplos, a ocultação, a restauração e o reinício no Edge. Os resultados estão registrados na seção 12. A demonstração e seus registros integram esta atualização do PR #3, ainda sem merge na main.
+
+A responsável sugeriu testar com outra pessoa. Foi recomendado começar com conversas fictícias entre adultos cientes do teste. Mensagens novas exigem integração do motor e definição do tratamento dos dados; resultados predefinidos não medem capacidade de detecção.
+
 Registro criado em **24/09/2026**. Datas apresentadas no horário de Brasília (America/Sao_Paulo), salvo indicação contrária.
 
 Este diário reúne o histórico disponível no GitHub e o trabalho realizado nesta tarefa em 23–24/09/2026. Não é uma transcrição das conversas nem uma certificação de funcionamento. Distingue código inspecionado, informações das mensagens de commits, ações executadas e testes pendentes.
@@ -219,3 +231,70 @@ O PR foi aberto em **24/09/2026 às 20:11:46 de Brasília** (23:11:46 UTC). Na a
 - **Estado final e pendências:**
 
 A atualização é manual, como parte de cada entrega. Este documento não cria uma automação de registro. Ao corrigir uma informação histórica, identificar a correção e sua fonte; não apresentar planos como trabalho concluído.
+
+## 12. 24/09/2026 — Testes guiados concluídos até aqui
+
+### Objetivo, execução e evidências
+
+A responsável pediu orientação passo a passo para testar a extensão e executou as ações no Microsoft Edge. O assistente orientou e examinou as capturas enviadas na conversa. Não houve controle remoto do navegador pelo assistente. A versão exata do Edge e do sistema operacional não foi coletada.
+
+Os resultados abaixo são verificações manuais da interface, não testes de capacidade de detecção. As imagens permanecem na conversa; não foram publicadas no repositório, pois algumas mostram abas e conteúdo alheios ao projeto. O [registro de teste](TESTE-MANUAL-EDGE.md) identifica as capturas pelos nomes dos arquivos para rastreabilidade, sem depender de caminhos temporários para sua leitura.
+
+### Instalação e popup 0.1.0
+
+1. As instruções iniciais eram para Chrome. A captura revelou que o navegador utilizado era Edge; o nome do botão foi corrigido para **Carregar sem pacote**.
+2. A pasta local da extensão foi selecionada. O cartão **CAP AI 0.1.0**, ativado, apareceu na lista.
+3. Uma tentativa de abertura levou à página de atalhos de teclado. Foi explicado como usar o botão de extensões da barra do navegador.
+4. O popup abriu com logo, versão e informações de privacidade visíveis.
+5. A responsável fechou e reabriu o popup; confirmou que apareceu igual e enviou nova captura.
+
+Resultado: instalação, abertura e reabertura verificadas no Edge. Não houve teste de análise ou bloqueio real, pois esses recursos não estavam implementados.
+
+### Da versão 0.1.0 à 0.2.0: o que mudou e por quê
+
+Foi solicitada a próxima etapa do projeto, com uma demonstração de chat. A versão 0.1.0 mostrava apenas o popup. Na 0.2.0, foi incluído um link para uma página local com três roteiros fictícios e resultados predefinidos.
+
+| Arquivo | Alteração | Motivo |
+|---|---|---|
+| `extension/manifest.json` | Versão 0.2.0 e descrição da demonstração. | Identificar a nova etapa ao recarregar a extensão. |
+| `extension/popup.html` | Novo texto, versão e link para o chat em outra aba. | Permitir acesso ao teste e informar que ainda não há IA. |
+| `extension/demo.html` | Seletor de exemplos, conversa, resultado, ocultação e reinício. | Demonstrar o fluxo de aviso e ação de interface. |
+| `extension/demo.css` | Estilos da página, disposição em colunas e adaptação a telas menores. | Organizar a leitura dos exemplos e resultados. A adaptação a telas menores não foi testada nesta sessão. |
+| `extension/demo.js` | Três roteiros, resultados fixos, ocultação reversível e limpeza do estado. | Testar a interação sem enviar dados ou depender de um modelo de IA. |
+| `extension/README.md` | Instruções de atualização e roteiro de testes 0.2.0. | Facilitar repetição e esclarecer limites. |
+| Documentos em `docs/` | Diário e relatório manual atualizados. | Preservar decisões e resultados observados. |
+
+O JavaScript usa texto predefinido e atua só na página local da extensão. Não foi conectado à banca de testes anterior, a serviços de IA ou a outras plataformas. Os arquivos originais da raiz não foram alterados.
+
+### Resultados da demonstração 0.2.0
+
+| Etapa | Resultado observado nas capturas | Situação |
+|---|---|---|
+| Atualização | Popup exibiu v0.2.0 e “Abrir chat de demonstração”. | Confirmado |
+| Abrir chat | Página do laboratório abriu, com aviso explícito de simulação sem IA. | Confirmado |
+| Amigos combinando um jogo | Três mensagens e “Exemplo sem alerta programado”; sem botão de ocultação. | Confirmado |
+| Desconhecido oferecendo presente e pedindo segredo | Alerta programado com explicação e botão de ocultar. | Confirmado |
+| Convite sem contexto suficiente | Duas mensagens e resultado de contexto insuficiente; sem botão de ocultação. | Confirmado |
+| Ocultar mensagem | Só a última mensagem foi substituída por “Mensagem ocultada nesta demonstração.”; as outras duas permaneceram visíveis. | Confirmado |
+| Restaurar mensagem | O texto original reapareceu e o botão voltou a oferecer ocultação. | Confirmado |
+| Reiniciar exemplo | Três mensagens visíveis, resultado e botão de ocultação ausentes, botão de resultado novamente disponível. | Confirmado visualmente |
+
+A primeira captura solicitada para a ocultação mostrava o exemplo de contexto insuficiente. Ela foi registrada como verificação desse terceiro exemplo; a responsável foi orientada a voltar ao roteiro do desconhecido. A ocultação foi confirmada somente após a captura correspondente. Nenhuma falha de código foi identificada pelas imagens; as dificuldades observadas foram de navegação entre as telas e exemplos.
+
+### Esclarecimentos e decisões registrados
+
+- Foi explicado o aviso de branch principal sem proteção: ausência de regras de proteção não significa que qualquer visitante possa editar o projeto. Não configuramos essas regras.
+- Foi explicado que o repositório público pode ser consultado por outras pessoas, mas a extensão não está publicada em loja e não é instalada automaticamente em outros computadores.
+- Foi esclarecido que ocultar texto nesta demonstração não bloqueia um contato nem impede mensagens em plataformas reais.
+- A responsável sugeriu testar com outra pessoa. A recomendação foi usar conversas fictícias entre adultos cientes do teste, depois da integração do motor. Nenhuma conversa nova entre duas pessoas foi analisada nesta etapa.
+- Resultados fixos não medem precisão, recall ou falsos alarmes de IA. Esses indicadores continuam sem validação nesta tarefa.
+
+### Estado ao encerrar este registro
+
+- Concluídos os testes guiados de interface descritos acima no Edge.
+- A sintaxe do script havia sido conferida com `node --check`; não foi executada uma suíte automatizada de navegador.
+- Não houve inspeção do console ou monitoramento de rede durante os testes manuais.
+- Testes no Chrome, acessibilidade por teclado, telas pequenas e recarga da página de demonstração continuam sem validação manual registrada.
+- Integração com IA, análise de mensagens livres e bloqueio em serviços reais não foram implementados.
+- A versão 0.2.0 e os registros são reunidos no PR #3 para revisão. Não foi feito merge, publicação em loja ou instalação em outro computador.
+- Próxima etapa proposta, ainda não executada: definir a integração do motor, o tratamento dos dados e os testes com novas conversas fictícias.
