@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CAP AI — Chat de demonstração</title>
+  <link rel="stylesheet" href="demo.css">
+  <script src="demo.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><p class="eyebrow">CAP AI · Laboratório local</p><h1>Como um aviso poderia funcionar</h1>
+      <p>Converse sobre os exemplos e experimente as ações de proteção.</p></header>
+    <aside class="notice"><strong>Simulação — sem análise de IA.</strong> As conversas são fictícias e os resultados foram definidos antecipadamente. Esta demonstração não detecta grooming e não bloqueia contatos em outros sites. Nada é enviado ou salvo.</aside>
+    <div class="controls">
+      <label for="scenario">1. Escolha um exemplo</label>
+      <select id="scenario">
+        <option value="friends">Amigos combinando um jogo</option>
+        <option value="unknown">Desconhecido oferecendo presente e pedindo segredo</option>
+        <option value="uncertain">Convite sem contexto suficiente</option>
+      </select>
+    </div>
+    <div class="columns">
+      <section aria-labelledby="chat-title"><h2 id="chat-title">Conversa fictícia</h2><ol id="messages"></ol></section>
+      <section aria-labelledby="result-title"><h2 id="result-title">Aviso de demonstração</h2>
+        <button id="evaluate" type="button">2. Mostrar resultado simulado</button>
+        <div id="result" role="status" aria-live="polite"></div>
+        <div id="actions" hidden><button id="visibility" type="button">Ocultar mensagem neste exemplo</button><p class="small">A ocultação só afeta esta página de teste. Você pode desfazê-la.</p></div>
+      </section>
+    </div>
+    <button id="reset" type="button" class="secondary">Reiniciar este exemplo</button>
+    <p class="small">Não use esta simulação para avaliar a segurança de uma conversa real. Um detector futuro poderá errar e precisará de avaliação própria.</p>
+  </main>
+</body>
+</html>
