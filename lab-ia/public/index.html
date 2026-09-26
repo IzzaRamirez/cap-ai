@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CAP AI — Teste com IA</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main><p class="brand">CAP AI · Laboratório com IA</p><h1>Teste uma conversa fictícia</h1>
+<p class="notice">Este teste envia o texto à Anthropic e pode consumir créditos da sua API. Use apenas exemplos inventados, sem dados pessoais. A IA pode errar; não há bloqueio automático ou monitoramento de outros sites.</p>
+<p id="connection" role="status">Conectando ao servidor local…</p>
+<label for="example">Começar com um exemplo (você pode editar)</label><select id="example"><option value="">Escolha…</option><option value="friends">Amigos combinando um jogo</option><option value="risk">Presente condicionado e segredo</option><option value="uncertain">Contexto insuficiente</option></select>
+<form id="form"><label for="conversation">Conversa fictícia</label><textarea id="conversation" maxlength="6000" rows="9" required placeholder="Pessoa A: ...&#10;Pessoa B: ..." autocomplete="off" spellcheck="false"></textarea><p id="count">0 / 6000 caracteres</p>
+<label class="consent"><input id="consent" type="checkbox" required> Confirmo que o texto é fictício, sem dados pessoais, e autorizo seu envio à Anthropic para esta análise.</label>
+<div class="buttons"><button id="analyze" disabled type="submit">Enviar à IA e analisar</button><button id="clear" type="button" class="secondary">Limpar</button></div></form>
+<p id="status" role="status" aria-live="polite"></p><section id="result" hidden aria-labelledby="result-title"><h2 id="result-title">Avaliação experimental</h2><div id="details"></div></section>
+<p class="small">O laboratório não grava a conversa ou a chave em arquivos nem no armazenamento do navegador. O texto e a resposta são processados pelo provedor de IA, conforme as condições da sua conta. Fechar a página apaga o estado da interface. Fechar o servidor encerra a sessão da chave.</p>
+</main></body></html>

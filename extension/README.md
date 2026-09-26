@@ -1,10 +1,12 @@
-# CAP AI — extensão 0.2.0
+# CAP AI — extensão 0.3.0
+
+Atualização: o popup também oferece um link para o [laboratório com IA](../lab-ia/README.md). Execute `INICIAR-IA.cmd` na raiz do projeto antes de abrir esse link. O laboratório envia à Anthropic somente o texto confirmado pelo usuário e usa a chave no servidor local. A simulação abaixo continua sem rede e com respostas fixas. Nenhuma permissão foi adicionada ao manifesto. A extensão não captura conversas de outros sites.
 
 Popup informativo e chat fictício com três resultados predefinidos. Esta demonstração não usa IA nem detecta grooming.
 
 ## Atualizar e testar
 
-1. Em edge://extensions, clique em Recarregar no cartão CAP AI. No Chrome, use chrome://extensions. Confira a versão 0.2.0.
+1. Em edge://extensions, clique em Recarregar no cartão CAP AI. No Chrome, use chrome://extensions. Confira a versão 0.3.0.
 2. Abra o popup e clique em Abrir chat de demonstração.
 3. Selecione o exemplo de amigos e mostre o resultado: não há ação de ocultação.
 4. Selecione o exemplo de desconhecido. Mostre o resultado e o alerta predefinido; o botão de ocultar deve substituir somente a última mensagem. Clique novamente para restaurá-la.

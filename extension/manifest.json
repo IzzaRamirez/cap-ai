@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "CAP AI",
-  "version": "0.2.0",
-  "description": "CAP AI com popup e chat fictício para demonstrar avisos locais, sem análise de IA.",
+  "version": "0.3.0",
+  "description": "CAP AI: simulação local e acesso ao laboratório de testes com IA.",
   "action": {
     "default_title": "CAP AI — Informações",
     "default_popup": "popup.html"

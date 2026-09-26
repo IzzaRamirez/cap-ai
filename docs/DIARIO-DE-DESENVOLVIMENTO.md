@@ -1,5 +1,29 @@
 # Diário de desenvolvimento — CAP AI
 
+> Estado atualizado em 26/09/2026 após os testes reais: três chamadas à Anthropic retornaram avaliações (5, 78 e 5). Veja a seção 14 e o relatório. Os trechos anteriores que indicam teste real pendente documentam o estado anterior à execução.
+
+## 14. 26/09/2026 — Primeiras respostas reais e envio ao GitHub
+
+A responsável confirmou que a tela de entrada da chave era a correta. Uma tentativa anterior mostrou “Chave vazia”: ela esclareceu que ainda não havia colado a chave, pois queria confirmar o local. Depois inseriu a credencial por entrada oculta e forneceu uma captura do servidor iniciado. O assistente não recebeu nem leu a chave.
+
+Foram executadas pela responsável três análises de conversas fictícias no laboratório: amigos (5/100 às 19:37:52), presente condicionado e segredo (78/100 às 19:39:22), convite sem contexto (5/100 às 19:42:42), conforme os horários das capturas. Modelo reportado `claude-sonnet-5`, prompt `capai-lab-1`. A integração funcionou nessas chamadas; não houve bloqueio automático.
+
+O caso de risco trouxe uma extrapolação na explicação: “insistência” não está claramente demonstrada pelo trecho. Foi registrada como melhoria pendente, sem alterar silenciosamente o prompt usado nos testes. O [relatório das três análises](RESULTADOS-IA-2026-09-26.md) preserva textos, resultados resumidos, fonte das evidências e limites.
+
+Foi preparado um [roteiro com seis novos casos](ROTEIRO-IA-NOVOS-CASOS.md) para comparar contextos inocentes, ambíguos e preocupantes, incluindo falsos alarmes e uma instrução embutida no diálogo. Os novos casos ainda não foram enviados à IA. Não foram realizadas novas chamadas pagas pelo assistente nesta atualização.
+
+A responsável pediu publicar no GitHub. A integração local 0.3.0, iniciador corrigido, testes automatizados e documentação são reunidos na branch do PR #3. O envio não inclui credenciais, arquivos de ambiente, logs ou capturas de tela. O PR permanece para revisão, sem merge na main e sem publicação de servidor ou extensão em loja. Os arquivos originais da raiz do projeto permanecem preservados.
+
+Pendências: executar o novo roteiro, corrigir e retestar a extrapolação de evidências, atualizar a mensagem inicial de validação da chave após sucesso, testar Chrome e separar a pasta local de CAP AI da pasta Brasil Encantado. A separação de pastas foi discutida, mas ainda não realizada; não confundir localização local com o repositório GitHub correto.
+
+## Correção do iniciador — 26/09/2026
+
+Na primeira tentativa de abrir INICIAR-IA.cmd, a captura da responsável mostrou erro de sintaxe antes do pedido da chave: o Windows PowerShell removeu as aspas da expressão JavaScript usada em `node -p`, resultando em `split(.)`. A mensagem posterior que pedia Node 22 era consequência dessa falha, não incompatibilidade: o Node instalado é v24.19.0. A chave não foi solicitada nessa execução.
+
+A verificação foi substituída por `node --version` e análise da versão no próprio PowerShell, com verificação do código de saída. Foi acrescentada a opção `-CheckOnly`, que encerra antes de solicitar credenciais. Teste executado com o mesmo `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ... -CheckOnly` usado pelo iniciador: passou e reconheceu v24.19.0. A verificação anterior de sintaxe do script não detectava esse problema de passagem de argumentos entre processos. A chamada real à Anthropic continua pendente. Correção salva localmente.
+
+> 26/09/2026 — Nova integração preparada localmente: veja a seção 13. O teste real com chave da Anthropic ainda está pendente; os resultados de 24/09 abaixo continuam sendo testes da simulação.
+
 > Atualizado até os testes guiados de 24/09/2026: versões 0.1.0 e 0.2.0 verificadas manualmente no Edge pela responsável, com capturas fornecidas na conversa. Veja [o registro completo dos testes](TESTE-MANUAL-EDGE.md) e a seção 12. Chrome e integração com IA continuam pendentes. As seções 1 a 11 preservam o histórico anterior aos testes.
 
 ## Nova etapa — demonstração 0.2.0
@@ -298,3 +322,23 @@ A primeira captura solicitada para a ocultação mostrava o exemplo de contexto 
 - Integração com IA, análise de mensagens livres e bloqueio em serviços reais não foram implementados.
 - A versão 0.2.0 e os registros são reunidos no PR #3 para revisão. Não foi feito merge, publicação em loja ou instalação em outro computador.
 - Próxima etapa proposta, ainda não executada: definir a integração do motor, o tratamento dos dados e os testes com novas conversas fictícias.
+
+## 13. 26/09/2026 — Laboratório para análise de conversas fictícias com IA
+
+**Pedido:** continuar para a integração com IA. A responsável confirmou possuir uma chave da Anthropic. A chave não foi solicitada na conversa nem acessada pelo assistente.
+
+**Antes:** extensão 0.2.0 apresentava três roteiros com respostas predefinidas, sem chamada a IA. **Depois:** versão 0.3.0 acrescenta link para um laboratório local, com campo editável e envio manual à Anthropic. A simulação permanece separada e preservada.
+
+**Como e por quê:** adicionado `lab-ia/server.mjs`, em Node.js sem dependências adicionais, para manter a credencial fora da extensão. O servidor só escuta `127.0.0.1:8765`. A página em `lab-ia/public/` envia a conversa após consentimento; apresenta score experimental, sinais, explicação, contexto ausente, modelo e versão do prompt. Não interpreta score como probabilidade e não executa bloqueio automático.
+
+`INICIAR-IA.cmd` e `lab-ia/start.ps1` permitem inserir a chave em prompt oculto, mantê-la em memória durante a sessão e encerrar pelo fechamento do servidor. Não foi criado arquivo com credenciais. Adicionado `.gitignore` para arquivos de ambiente, logs e segredos. A página não salva conteúdo no navegador. O texto é processado pela Anthropic e pode consumir créditos; as condições da conta e do provedor se aplicam.
+
+**Controles implementados:** endpoint externo fixo; validação de host, origem e token; sem CORS aberto; lista explícita de arquivos públicos; limite de entrada; uma análise de cada vez; intervalo entre pedidos; timeout; nenhuma repetição automática; mensagens de erro sem corpo bruto do provedor; validação de JSON, faixa e campos. Recusas e respostas truncadas não viram avaliações. Saída exibida como texto para evitar execução de HTML.
+
+**Referências:** documentação oficial da Anthropic consultada em 26/09/2026: [modelos](https://platform.claude.com/docs/en/models/overview) e [saídas estruturadas](https://platform.claude.com/docs/en/build-with-claude/structured-outputs). Padrão `claude-sonnet-5`, formato `output_config.format`. O prompt `capai-lab-1` orienta análise contextual, explicitação de incerteza e tratamento da conversa como dados não confiáveis. Isso não elimina erros ou ataques ao modelo e não valida eficácia de detecção.
+
+**Verificações:** oito testes automatizados passaram, usando respostas simuladas e chave fictícia; nenhuma chamada real à Anthropic foi executada. A primeira rodada teve uma falha no teste de host, pois o cliente fetch não enviou a substituição de Host; o teste foi corrigido para usar HTTP direto e confirmou a rejeição. Sintaxe do JavaScript e do PowerShell verificada. Na prévia do navegador interno, o estado sem chave impediu envio; escolha de exemplo e limpeza funcionaram. A prévia foi encerrada, liberando a porta para o teste da responsável.
+
+**Pendências:** iniciar o programa com a chave real, confirmar acesso/créditos/modelo na conta e realizar primeira análise; testar resultado e falhas no Edge; registrar acertos, falsos alarmes e perigos não detectados em conjunto de exemplos rotulados. Não houve teste no Chrome, validação estatística ou captura automática de chats. Os novos arquivos e registros desta etapa estão locais, ainda não enviados ao GitHub.
+
+**Instruções:** [Laboratório com IA](../lab-ia/README.md). A etapa não altera a banca original nem publica servidor, site ou extensão em loja.
