@@ -10,9 +10,29 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #faf8f4; color: #2a2a28; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+    .project-guide { max-width: 760px; margin: 22px auto 0; padding: 18px 20px; border: 1px solid #c4d8cf; border-radius: 12px; background: #edf5f0; line-height: 1.55; }
+    .project-guide-title { font-weight: 700; color: #145943; margin-bottom: 5px; }
+    .project-guide nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+    .project-guide a { color: #145943; text-underline-offset: 3px; }
+    .project-guide nav a { padding: 8px 11px; border: 1px solid #9fbdb0; border-radius: 7px; background: #fff; font-size: 14px; }
+    .project-guide a:focus-visible { outline: 3px solid #145943; outline-offset: 3px; }
+    .project-guide-note, .project-guide-links { font-size: 13px; }
+    .project-guide-links { margin-top: 10px; }
+    @media (max-width: 792px) { .project-guide { margin: 16px 16px 0; padding: 16px; } }
   </style>
 </head>
 <body>
+<header class="project-guide" aria-label="Guia do projeto CAP AI">
+  <p class="project-guide-title">CAP AI · Guia do projeto</p>
+  <p>Você está na <strong>banca original de 24 testes</strong>. O projeto também tem uma simulação e um laboratório local com IA.</p>
+  <nav aria-label="Escolher um teste">
+    <a href="#root">Usar esta banca</a>
+    <a href="extension/demo.html">Ver simulação sem IA</a>
+    <a href="https://github.com/IzzaRamirez/cap-ai/blob/main/lab-ia/README.md">Como abrir o laboratório com IA</a>
+  </nav>
+  <p class="project-guide-note">A banca abaixo usa sua chave no navegador. O laboratório precisa ser iniciado no seu computador. Os testes são experimentais e não monitoram nem bloqueiam chats reais.</p>
+  <p class="project-guide-links"><a href="https://github.com/IzzaRamirez/cap-ai#readme">Entender as partes do projeto</a> · <a href="https://github.com/IzzaRamirez/cap-ai/blob/main/docs/DIARIO-DE-DESENVOLVIMENTO.md">Diário de desenvolvimento</a></p>
+</header>
 <div id="root"></div>
 <script type="text/babel">
 const { useState } = React;

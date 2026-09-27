@@ -4,9 +4,11 @@ Atualização de 26/09/2026: a responsável concluiu três análises reais. Veja
 
 Protótipo local, sem bibliotecas adicionais. Requer Node.js 22 ou superior. Não é um detector validado e não bloqueia conversas. A demonstração 0.2.0 com respostas fixas continua disponível separadamente.
 
+Este laboratório complementa a [banca original de 24 testes](https://izzaramirez.github.io/cap-ai/). Aqui ainda não há execução em lote, edição do prompt pela interface ou exportação CSV. Os prompts e formatos das duas ferramentas são distintos; as avaliações ainda não foram comparadas em uma rodada comum. Veja o [mapa do projeto](../README.md).
+
 ## Iniciar no Windows
 
-1. Na pasta `cap-ai-review`, abra `INICIAR-IA.cmd` com dois cliques.
+1. Na pasta do repositório baixado e extraído (por exemplo, `cap-ai-main` ou a cópia local `cap-ai-review`), abra `INICIAR-IA.cmd` com dois cliques.
 2. A janela pede sua chave da Anthropic com entrada oculta. Cole a chave e pressione Enter. Não digite a chave como comando, não a envie no chat nem a coloque em arquivos versionados.
 3. Aguarde aparecer `CAP AI: http://127.0.0.1:8765`.
 4. Abra `http://127.0.0.1:8765` no Edge e mantenha a janela do iniciador aberta.
@@ -39,6 +41,6 @@ Fontes consultadas: [modelos](https://platform.claude.com/docs/en/models/overvie
 
 Execute, na raiz do projeto: `node --test lab-ia/server.test.mjs`.
 
-Em 26/09/2026: oito testes automatizados passaram com provedor simulado, sem chave real e sem consumo da API. Cobrem consentimento, entrada, sessão, origem, host, acesso a arquivos, erros, saída inválida, timeout, concorrência e intervalo. Sintaxe do JavaScript e do iniciador PowerShell verificada. Navegador interno: tela sem chave, seleção de exemplo e limpeza conferidas. O iniciador interativo com chave real e o fluxo completo com Anthropic ainda precisam de teste pelo usuário.
+Em 26/09/2026: oito testes automatizados passaram com provedor simulado, sem chave real e sem consumo da API. Cobrem consentimento, entrada, sessão, origem, host, acesso a arquivos, erros, saída inválida, timeout, concorrência e intervalo. Sintaxe do JavaScript e do iniciador PowerShell verificada. Navegador interno: tela sem chave, seleção de exemplo e limpeza conferidas. Depois dessas verificações, a responsável testou o iniciador com sua chave e concluiu três análises reais; os resultados e limites estão no [relatório de 26/09/2026](../docs/RESULTADOS-IA-2026-09-26.md).
 
-Roteiro para a primeira rodada: analisar os três exemplos e uma variação fictícia de cada um. Registrar modelo, versão do prompt, data, resultado esperado, resposta obtida e discordâncias. Não interpretar três casos como validação estatística. Resultados podem variar entre chamadas. Não usar dados reais de crianças nesta etapa.
+Próxima rodada: executar o [roteiro de seis novos casos](../docs/ROTEIRO-IA-NOVOS-CASOS.md), ainda pendente. Registrar modelo, versão do prompt, data, resultado esperado, resposta obtida e discordâncias. Não interpretar três casos como validação estatística. Resultados podem variar entre chamadas. Não usar dados reais de crianças nesta etapa.
