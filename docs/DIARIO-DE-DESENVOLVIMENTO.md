@@ -1,6 +1,30 @@
 # Diário de desenvolvimento — CAP AI
 
-> Estado atualizado em 26/09/2026 após os testes reais: três chamadas à Anthropic retornaram avaliações (5, 78 e 5). Veja a seção 14 e o relatório. Os trechos anteriores que indicam teste real pendente documentam o estado anterior à execução.
+> Estado atualizado em 26/09/2026: o PR #3 foi integrado à `main`. A banca original continua presente; a extensão e o laboratório local são componentes distintos. A seção 15 registra a organização da apresentação. As entradas anteriores preservam o estado de cada etapa, inclusive quando o merge ou os testes reais ainda estavam pendentes.
+
+## 15. 26/09/2026 — Organização do projeto e esclarecimento sobre o protótipo original
+
+**Pedido / motivo:** a responsável questionou a coerência do repositório e lembrou que já possuía um protótipo de teste no GitHub Pages. Autorizou organizar a apresentação para explicar como as partes se relacionam. A explicação anterior do assistente não deixou essa relação suficientemente clara e gerou a impressão de que o protótipo anterior poderia ter sido perdido.
+
+**Estado anterior confirmado:** `index.html` já implementava análise individual, lote de 24 exemplos, edição do prompt e CSV. O README destacava apenas essa banca, enquanto a `main` também continha `extension/` e `lab-ia/`. A introdução descrevia captura e ações preventivas como operação do produto, embora o próprio aviso de estado atual delimitasse o protótipo. O README do laboratório ainda continha uma pendência de teste real já concluída.
+
+**Integração anterior confirmada:** o [PR #3](https://github.com/IzzaRamirez/cap-ai/pull/3) foi integrado em 26/09/2026, no commit [4decbeb](https://github.com/IzzaRamirez/cap-ai/commit/4decbeb8c889ceb16f80674465494a0b2bb42b06). O `index.html` da banca continuava no repositório ao iniciar esta etapa. Publicar o código do laboratório no GitHub não inicia seu servidor no GitHub Pages.
+
+**Alterações e como foram feitas:**
+
+| Arquivo | Alteração | Por quê |
+|---|---|---|
+| `README.md` | Mapa das três partes, acessos, diferenças de chave e dados, testes observados e próximos passos. | Explicar o estágio real, reconhecer a banca preexistente e distinguir funcionalidades futuras. |
+| `index.html` | Guia estático acima da banca, com atalhos para a própria banca, simulação, instruções do laboratório e diário. | Orientar quem abre o link já salvo, mantendo a banca como entrada principal. |
+| `lab-ia/README.md` | Relação com a banca, instrução independente do nome da pasta e atualização dos testes concluídos. | Evitar contradições entre documentação, evidências e formas de acesso. |
+| Este diário | Novo registro e atualização do resumo de estado. | Preservar a sequência e explicar a correção da comunicação. |
+
+O código JavaScript da banca, os 24 exemplos, o prompt, o modelo, o critério de comparação e o CSV são preservados nesta etapa. A mudança no site consiste em HTML e CSS de orientação; não unifica motores nem adiciona análise, coleta ou bloqueio. A simulação pode ser aberta pelo link público sem instalar a extensão, mas continua com respostas fixas. O laboratório continua dependendo de execução local. Não foram feitas novas chamadas pagas à IA.
+
+**Verificações desta alteração:** comparação dos blocos JavaScript do `index.html` com a versão anterior: idênticos; os 24 exemplos foram preservados. Na prévia do navegador, o guia, a banca e o seletor com 24 opções foram exibidos, e o link para a simulação abriu a página esperada. Os destinos relativos dos links Markdown foram conferidos contra a árvore do repositório. Não houve teste de análise paga ou nova avaliação do motor nesta etapa. A publicação e o merge podem ser consultados no [histórico deste arquivo](https://github.com/IzzaRamirez/cap-ai/commits/main/docs/DIARIO-DE-DESENVOLVIMENTO.md).
+
+**Pendências que continuam:** avaliação comum entre banca e laboratório; seis novos casos; correção e reteste da extrapolação de evidência; atualização da mensagem de validação da chave; testes no Chrome; separação da pasta local de CAP AI da pasta Brasil Encantado. Essa localização local não muda o repositório remoto de destino.
+
 
 ## 14. 26/09/2026 — Primeiras respostas reais e envio ao GitHub
 
